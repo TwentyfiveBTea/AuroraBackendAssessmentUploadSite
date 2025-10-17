@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极光后端考核</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #bbdefb, #e3f2fd, #f5f7fa);
+            color: #333;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, rgba(179, 229, 252, 0.9), rgba(129, 212, 250, 0.9));
+            color: #01579b;
+            padding: 20px 0;
+            box-shadow: 3px 0 15px rgba(179, 229, 252, 0.5);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(1, 87, 155, 0.1);
+        }
+
+        .sidebar::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+            transform: rotate(30deg);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            padding: 0 15px;
+            position: relative;
+            color: #01579b;
+            font-weight: 600;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar li {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            margin: 5px 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            color: #01579b;
+            font-weight: 500;
+        }
+
+        .sidebar li:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        .sidebar li.active {
+            background-color: rgba(255, 255, 255, 0.7);
+            border-left: 4px solid #01579b;
+            box-shadow: 0 4px 8px rgba(179, 229, 252, 0.3);
+        }
+
+        /* 主内容区域样式 */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* 内容区域样式 */
+        .content-section {
+            display: none;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 249, 255, 0.8));
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(179, 229, 252, 0.3);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(179, 229, 252, 0.5);
+            animation: fadeIn 0.5s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h2 {
+            color: #01579b;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(179, 229, 252, 0.5);
+            font-size: 1.8rem;
+        }
+
+        .content-section h3 {
+            color: #0277bd;
+            margin: 25px 0 15px;
+            font-size: 1.3rem;
+        }
+
+        .file-input {
+            margin: 20px 0;
+        }
+
+        .file-input input {
+            padding: 12px 15px;
+            border: 2px dashed #81d4fa;
+            border-radius: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .file-input input:hover {
+            border-color: #4fc3f7;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 8px rgba(179, 229, 252, 0.2);
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .upload-btn:hover {
+            background: linear-gradient(135deg, #29b6f6, #039be5);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 18px rgba(79, 195, 247, 0.4);
+        }
+
+        .upload-btn:disabled {
+            background: #b3e5fc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .success {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #0d47a1;
+            border: 1px solid #90caf9;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(179, 229, 252, 0.3);
+            box-shadow: 0 4px 10px rgba(179, 229, 252, 0.1);
+        }
+
+        /* 下载选项样式 */
+        .download-options {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .download-card, .upload-card {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 249, 255, 0.8));
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(179, 229, 252, 0.5);
+            box-shadow: 0 4px 8px rgba(179, 229, 252, 0.2);
+        }
+
+        .download-card:hover, .upload-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(179, 229, 252, 0.3);
+            background: linear-gradient(135deg, #e3f2fd, #f5f9ff);
+        }
+
+        .download-card h3, .upload-card h3 {
+            color: #01579b;
+            margin-bottom: 10px;
+        }
+
+        .download-card p, .upload-card p {
+            color: #0277bd;
+            font-size: 0.9rem;
+            margin: 10px 0;
+        }
+
+        .upload-card .hint {
+            font-size: 0.8rem;
+            color: #e91e63;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(233, 30, 99, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #e91e63;
+        }
+
+        /* 姓名输入区域样式 */
+        .name-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(227, 242, 253, 0.8));
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+            border: 1px solid rgba(179, 229, 252, 0.5);
+            box-shadow: 0 4px 12px rgba(179, 229, 252, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .name-section::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #e3f2fd, #bbdefb, #e3f2fd);
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.7;
+        }
+
+        .name-section h3 {
+            color: #01579b;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .name-section p {
+            color: #0277bd;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .name-input-container {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .name-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #81d4fa;
+            border-radius: 30px 0 0 30px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: #039be5;
+            box-shadow: 0 0 12px rgba(3, 155, 229, 0.4);
+        }
+
+        .name-submit-btn {
+            background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+            color: white;
+            border: none;
+            border-radius: 0 30px 30px 0;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .name-submit-btn:hover {
+            background: linear-gradient(135deg, #29b6f6, #039be5);
+            box-shadow: 0 4px 10px rgba(79, 195, 247, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 15px 0;
+            }
+
+            .sidebar ul {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .sidebar li {
+                padding: 12px 20px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                margin: 5px;
+            }
+
+            .sidebar li.active {
+                border-left: none;
+                border-bottom: 3px solid #01579b;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .download-options {
+                flex-direction: column;
+            }
+
+            .name-input-container {
+                flex-direction: column;
+            }
+
+            .name-input {
+                border-radius: 30px;
+                margin-bottom: 10px;
+            }
+
+            .name-submit-btn {
+                border-radius: 30px;
+                padding: 14px;
+            }
+        }
+
+        /* 添加一些装饰性元素 */
+        .decoration {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+
+        .dec-1 {
+            top: 10%;
+            right: 10%;
+        }
+
+        .dec-2 {
+            bottom: 15%;
+            left: 5%;
+        }
+
+        /* Instagram风格元素 */
+        .insta-border {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insta-border::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #81d4fa, #4fc3f7, #29b6f6, #4fc3f7, #81d4fa) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="decoration dec-1"></div>
+        <div class="decoration dec-2"></div>
+        <h2>极光后端考核</h2>
+        <ul>
+            <li class="active" onclick="showSection('download-section')">
+                下载试题
+            </li>
+            <li onclick="showSection('upload-section')">
+                上传试题
+            </li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <div class="header">
+        </div>
+
+        <!-- 下载试题区域 -->
+        <div id="download-section" class="content-section active insta-border">
+            <h2>下载试题</h2>
+            <p>请选择需要下载的试题类型</p>
+
+            <div class="download-options">
+                <div class="download-card" onclick="downloadPaperExam()">
+                    <h3>笔试题</h3>
+                    <p>理论知识与概念题</p>
+                    <button class="upload-btn" style="margin-top: 15px;">下载笔试题</button>
+                </div>
+
+                <div class="download-card" onclick="downloadLabExam()">
+                    <h3>机试题</h3>
+                    <p>编程实践与上机操作题</p>
+                    <button class="upload-btn" style="margin-top: 15px;">下载机试题</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 上传试题区域 -->
+        <div id="upload-section" class="content-section insta-border">
+            <h2>上传试题</h2>
+
+            <!-- 姓名输入区域 -->
+            <div class="name-section">
+                <h3>请在下方输入您的姓名</h3>
+                <p>并选择需要上传的试题类型</p>
+                <div class="name-input-container">
+                    <input type="text" id="userName" class="name-input" placeholder="请输入您的姓名">
+                    <button class="name-submit-btn" onclick="confirmName()">确认姓名</button>
+                </div>
+                <div id="nameResult" class="result" style="margin-top: 15px;"></div>
+            </div>
+
+            <div class="download-options">
+                <!-- 上传 docx 文件部分 -->
+                <div class="upload-card">
+                    <h3>笔试题（docx 文件）</h3>
+                    <p>上传 Word 文档格式试题</p>
+                    <div class="hint">提交时确保在上方输入了自己的名字</div>
+                    <div class="file-input">
+                        <input type="file" id="docxFile" accept=".docx"/>
+                    </div>
+                    <button class="upload-btn" onclick="uploadDocx()">上传 DOCX 文件</button>
+                    <div id="docxResult" class="result"></div>
+                </div>
+
+                <!-- 批量上传 Java 文件部分 -->
+                <div class="upload-card">
+                    <h3>机试题（java 文件）</h3>
+                    <p>批量上传 Java 源代码文件</p>
+                    <div class="hint">提交时确保在上方输入了自己的名字</div>
+                    <div class="file-input">
+                        <input type="file" id="javaFiles" multiple accept=".java"/>
+                    </div>
+                    <button class="upload-btn" onclick="uploadJavaFiles()">批量上传 Java 文件</button>
+                    <div id="javaResult" class="result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 切换显示区域
+    function showSection(sectionId) {
+        // 隐藏所有内容区域
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // 显示选中的内容区域
+        document.getElementById(sectionId).classList.add('active');
+
+        // 更新侧边栏活动状态
+        document.querySelectorAll('.sidebar li').forEach(li => {
+            li.classList.remove('active');
+        });
+
+        // 根据选中的内容区域设置侧边栏活动状态
+        if (sectionId === 'download-section') {
+            document.querySelector('.sidebar li:first-child').classList.add('active');
+        } else {
+            document.querySelector('.sidebar li:last-child').classList.add('active');
+        }
+    }
+
+    // 确认姓名
+    function confirmName() {
+        const nameInput = document.getElementById('userName');
+        const resultDiv = document.getElementById('nameResult');
+
+        if (!nameInput.value.trim()) {
+            showResult(resultDiv, '请输入您的姓名', 'error');
+            return;
+        }
+
+        showResult(resultDiv, `姓名已确认：${nameInput.value}，现在可以上传文件了`, 'success');
+    }
+
+    // 上传 docx 文件
+    function uploadDocx() {
+        const fileInput = document.getElementById('docxFile');
+        const nameInput = document.getElementById('userName');
+        const resultDiv = document.getElementById('docxResult');
+
+        // 检查姓名是否为空
+        if (!nameInput.value.trim()) {
+            showResult(resultDiv, '请先输入您的姓名并点击确认', 'error');
+            return;
+        }
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showResult(resultDiv, '请先选择一个 DOCX 文件', 'error');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        if (!file.name.endsWith('.docx')) {
+            showResult(resultDiv, '请选择一个 DOCX 文件', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'docx');
+        formData.append('name', nameInput.value); // 添加姓名参数
+
+        // 禁用按钮防止重复提交
+        const btn = event.target || event.srcElement;
+        btn.disabled = true;
+        btn.textContent = '上传中...';
+
+        fetch('/upload/docx', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.data) {
+                    // 修改显示方式，使其与Java文件上传保持一致
+                    let message = '上传成功！<br/>';
+                    message += '成功上传以下文件:<br/>';
+                    message += '<ul>';
+                    // 从URL中提取文件名
+                    const fileName = data.data.substring(data.data.lastIndexOf('/') + 1);
+                    message += '<li>' + fileName + '</li>';
+                    message += '</ul>';
+                    showResult(resultDiv, message, 'success');
+                } else {
+                    showResult(resultDiv, '上传失败: ' + (data.message || '未知错误'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showResult(resultDiv, '上传失败: ' + error.message, 'error');
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                btn.disabled = false;
+                btn.textContent = '上传 DOCX 文件';
+            });
+    }
+
+    // 批量上传 Java 文件
+    function uploadJavaFiles() {
+        const fileInput = document.getElementById('javaFiles');
+        const nameInput = document.getElementById('userName');
+        const resultDiv = document.getElementById('javaResult');
+
+        // 检查姓名是否为空
+        if (!nameInput.value.trim()) {
+            showResult(resultDiv, '请先输入您的姓名并点击确认', 'error');
+            return;
+        }
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showResult(resultDiv, '请先选择至少一个 Java 文件', 'error');
+            return;
+        }
+
+        // 检查是否都是 Java 文件
+        for (let i = 0; i < fileInput.files.length; i++) {
+            if (!fileInput.files[i].name.endsWith('.java')) {
+                showResult(resultDiv, '请选择 Java 文件(.java)', 'error');
+                return;
+            }
+        }
+
+        const formData = new FormData();
+        for (let i = 0; i < fileInput.files.length; i++) {
+            formData.append('files', fileInput.files[i]);
+        }
+        formData.append('folder', 'java');
+        formData.append('name', nameInput.value); // 添加姓名参数
+
+        // 禁用按钮防止重复提交
+        const btn = event.target || event.srcElement;
+        btn.disabled = true;
+        btn.textContent = '上传中...';
+
+        fetch('/upload/java', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.data) {
+                    let message = '上传成功！<br/>';
+                    message += '成功上传以下文件:<br/>';
+                    message += '<ul>';
+                    data.data.forEach((url, index) => {
+                        // 从URL中提取文件名
+                        const fileName = url.substring(url.lastIndexOf('/') + 1);
+                        message += '<li>' + fileName + '</li>';
+                    });
+                    message += '</ul>';
+                    showResult(resultDiv, message, 'success');
+                } else {
+                    showResult(resultDiv, '上传失败: ' + (data.message || '未知错误'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showResult(resultDiv, '上传失败: ' + error.message, 'error');
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                btn.disabled = false;
+                btn.textContent = '批量上传 Java 文件';
+            });
+    }
+
+    // 显示结果
+    function showResult(element, message, type) {
+        element.innerHTML = message;
+        element.className = 'result ' + type;
+        element.style.display = 'block';
+    }
+
+    // 下载笔试题
+    function downloadPaperExam() {
+        const paperExamUrl = 'http://aurora-backend-assessment.oss-cn-beijing.aliyuncs.com/question/%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%20%E6%9E%81%E5%85%89%E5%B7%A5%E4%BD%9C%E5%AE%A4%2025%E5%90%8E%E7%AB%AF%E4%BA%8C%E8%BD%AE%E8%80%83%E6%A0%B8%E7%AC%94%E8%AF%95%E9%A2%98.docx';
+        window.open(paperExamUrl, '_blank');
+    }
+
+    // 下载机试题
+    function downloadLabExam() {
+        const labExamUrl = 'http://aurora-backend-assessment.oss-cn-beijing.aliyuncs.com/question/%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%20%E6%9E%81%E5%85%89%E5%B7%A5%E4%BD%9C%E5%AE%A4%2025%E5%90%8E%E7%AB%AF%E4%BA%8C%E8%BD%AE%E8%80%83%E6%A0%B8%E6%9C%BA%E8%AF%95%E9%A2%98.docx';
+        window.open(labExamUrl, '_blank');
+    }
+</script>
+</body>
+</html>
